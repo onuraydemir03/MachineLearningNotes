@@ -5,6 +5,8 @@ from torch.utils.data import DataLoader
 
 
 DATASETS_DIR = "/home/onuraydemir/Desktop/Code/DeepLearningFundamentalsClean/Datasets"
+LOG_DIR = "/home/onuraydemir/Desktop/Code/DeepLearningFundamentalsClean/Logs"
+
 def count_classes(dataloader: DataLoader):
     counter = Counter()
     for _, lbl in dataloader:

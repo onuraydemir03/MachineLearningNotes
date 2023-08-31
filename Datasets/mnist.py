@@ -5,8 +5,10 @@ from torchvision import datasets, transforms
 from utils import count_classes, get_majority_rule_acc, DATASETS_DIR
 import os.path as op
 
+
 class MNIST(Dataset):
-    def __init__(self, sequence: str = "train"):
+    def __init__(self, sequence: str = "train", flat=True):
+        self.flat = flat
         if sequence == "test":
             self.dataset = datasets.MNIST(root=op.join(DATASETS_DIR, "mnist"), train=False, transform=transforms.ToTensor())
         else:
@@ -15,20 +17,23 @@ class MNIST(Dataset):
                 _, self.dataset = random_split(self.dataset, lengths=[55000, 5000])
 
     def __getitem__(self, item):
-        return self.dataset[item]
+        features, labels = self.dataset[item]
+        if self.flat:
+            features = features.flatten()
+        return features, labels
 
     def __len__(self):
         return len(self.dataset)
 
 
-def init_dataloaders():
-    train_dataset = MNIST(sequence="train")
+def init_dataloaders(flat=True):
+    train_dataset = MNIST(sequence="train", flat=flat)
     train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True, drop_last=True)
 
-    val_dataset = MNIST(sequence="val")
+    val_dataset = MNIST(sequence="val", flat=flat)
     val_dataloader = DataLoader(val_dataset, batch_size=64, shuffle=False)
 
-    test_dataset = MNIST(sequence="test")
+    test_dataset = MNIST(sequence="test", flat=flat)
     test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     return train_dataloader, val_dataloader, test_dataloader
