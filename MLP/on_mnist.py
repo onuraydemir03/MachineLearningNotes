@@ -36,6 +36,15 @@ def train(model, optimizer, num_epochs, train_dataloader, val_dataloader):
         print()
 
 
+def eval(model, test_dataloader):
+    test_acc = torchmetrics.Accuracy(task="multiclass", num_classes=10)
+    model.eval()
+    for idx, (features, labels) in enumerate(test_dataloader):
+        features = features.flatten(start_dim=1)
+        logits = model(features)
+        pred_labels = torch.argmax(logits, dim=1)
+        test_acc(pred_labels, labels)
+    print(f"Test accuracy: {test_acc.compute():.2f}")
 
 
 if __name__ == '__main__':
@@ -45,3 +54,4 @@ if __name__ == '__main__':
     num_epochs = 10
 
     train(model, optimizer, num_epochs, train_dataloader, val_dataloader)
+    eval(model, test_dataloader)
