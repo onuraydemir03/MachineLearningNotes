@@ -1,7 +1,7 @@
 from torch import nn
 
 
-class MultiLayerPerceptron(nn.Module):
+class MLP(nn.Module):
     def __init__(self,
                  num_features: int,
                  num_classes: int):
