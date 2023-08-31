@@ -48,5 +48,15 @@ class LightningModel(L.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), lr=self.lr)
+        # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.num_epochs)
+        # return {
+        #     "optimizer": optimizer,
+        #     "lr_scheduler": {
+        #         "scheduler": scheduler,
+        #         "monitor": "train_loss",
+        #         "interval": "epoch",
+        #         "frequency": 1,
+        #     },
+        # }
         return optimizer
 
