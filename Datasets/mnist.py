@@ -2,15 +2,15 @@ import torch
 from torch.utils.data import Dataset, random_split, DataLoader
 from torchvision import datasets, transforms
 
-from utils import count_classes, get_majority_rule_acc
-
+from utils import count_classes, get_majority_rule_acc, DATASETS_DIR
+import os.path as op
 
 class MNIST(Dataset):
     def __init__(self, sequence: str = "train"):
         if sequence == "test":
-            self.dataset = datasets.MNIST(root="./mnist", train=False, transform=transforms.ToTensor())
+            self.dataset = datasets.MNIST(root=op.join(DATASETS_DIR, "mnist"), train=False, transform=transforms.ToTensor())
         else:
-            self.dataset = datasets.MNIST(root="./mnist", train=True, transform=transforms.ToTensor(), download=True)
+            self.dataset = datasets.MNIST(root=op.join(DATASETS_DIR, "mnist"), train=True, transform=transforms.ToTensor(), download=True)
             if sequence == "val":
                 _, self.dataset = random_split(self.dataset, lengths=[55000, 5000])
 

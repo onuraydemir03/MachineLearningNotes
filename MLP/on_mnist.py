@@ -1,57 +1,21 @@
 import torch.optim
-import torchmetrics
-from tqdm import tqdm
 
 from Datasets.mnist import init_dataloaders
 from MLP.mlp_torch_model import MultiLayerPerceptron
-import torch.nn.functional as F
+
+from train_eval_network import train, eval
 
 
-def train(model, optimizer, num_epochs, train_dataloader, val_dataloader):
-    pbar = tqdm(range(num_epochs))
-    train_acc = torchmetrics.Accuracy(task="multiclass", num_classes=10)
-    val_acc = torchmetrics.Accuracy(task="multiclass", num_classes=10)
-    for epoch_no in pbar:
-        model.train()
-        for idx, (features, labels) in enumerate(train_dataloader):
-            features = features.flatten(start_dim=1)
-            logits = model(features)
-            train_loss = F.cross_entropy(logits, labels)
-
-            optimizer.zero_grad()
-            train_loss.backward()
-            optimizer.step()
-
-            pred_labels = torch.argmax(logits, dim=1)
-            train_acc(pred_labels, labels)
-
-        model.eval()
-        for idx, (features, labels) in enumerate(val_dataloader):
-            features = features.flatten(start_dim=1)
-            logits = model(features)
-            val_loss = F.cross_entropy(logits, labels)
-            pred_labels = torch.argmax(logits, dim=1)
-            val_acc(pred_labels, labels)
-        pbar.set_postfix_str(f"Ep: {epoch_no} > train_loss: {train_loss:.2f} | val_acc: {train_acc.compute():.2f} | val_loss: {val_loss:.2f} | val_acc: {val_acc.compute():.2f}")
-        print()
-
-
-def eval(model, test_dataloader):
-    test_acc = torchmetrics.Accuracy(task="multiclass", num_classes=10)
-    model.eval()
-    for idx, (features, labels) in enumerate(test_dataloader):
-        features = features.flatten(start_dim=1)
-        logits = model(features)
-        pred_labels = torch.argmax(logits, dim=1)
-        test_acc(pred_labels, labels)
-    print(f"Test accuracy: {test_acc.compute():.2f}")
+def train_eval_mlp(train_dataloader, val_dataloader, test_dataloader, num_epochs, device):
+    model = MultiLayerPerceptron(num_features=784, num_classes=10)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
+    train(model, optimizer, num_epochs, train_dataloader, val_dataloader, device)
+    eval(model, test_dataloader, device)
 
 
 if __name__ == '__main__':
     train_dataloader, val_dataloader, test_dataloader = init_dataloaders()
-    model = MultiLayerPerceptron(num_features=784, num_classes=10)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
     num_epochs = 10
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    train_eval_mlp(train_dataloader, val_dataloader, test_dataloader, num_epochs, device)
 
-    train(model, optimizer, num_epochs, train_dataloader, val_dataloader)
-    eval(model, test_dataloader)
